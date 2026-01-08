@@ -1,0 +1,57 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Cypress
+cypress/videos/
+cypress/screenshots/
+cypress/downloads/
+
+# Generated Reports (exclude generated HTML/JSON files)
+cypress/reports/**/*.html
+cypress/reports/**/*.json
+mochawesome-report/
+*.log
+
+# But keep the reports directory structure
+!cypress/reports/.gitkeep
+
+# Test results
+test-results/
+*.log
+*.logs
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*.swn
+.DS_Store
+
+# OS
+Thumbs.db
+Desktop.ini
+
+# Cypress binary cache
+.cypress-cache/
+
+# Debugging
+debug.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build output
+dist/
+build/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/

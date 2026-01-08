@@ -1,0 +1,33 @@
+{
+  "name": "westwing-automation",
+  "version": "1.0.0",
+  "description": "Automated test framework for Westwing Now e-commerce platform using Cypress and Cucumber",
+  "main": "index.js",
+  "scripts": {
+    "test": "cypress run",
+    "test:headed": "cypress run --headed",
+    "test:chrome": "cypress run --browser chrome",
+    "test:firefox": "cypress run --browser firefox",
+    "test:tags": "cypress run --env tags=",
+    "cy:open": "cypress open",
+    "report:generate": "node cypress/reports/generate-report.js",
+    "test:report": "npm run test && npm run report:generate"
+  },
+  "keywords": [
+    "cypress",
+    "cucumber",
+    "bdd",
+    "e2e",
+    "automation",
+    "testing"
+  ],
+  "author": "Daniel",
+  "license": "MIT",
+  "devDependencies": {
+    "@badeball/cypress-cucumber-preprocessor": "^20.0.0",
+    "@bahmutov/cypress-esbuild-preprocessor": "^2.2.0",
+    "cypress": "^13.6.0",
+    "cypress-mochawesome-reporter": "^3.8.0",
+    "multiple-cucumber-html-reporter": "^3.5.0"
+  }
+}

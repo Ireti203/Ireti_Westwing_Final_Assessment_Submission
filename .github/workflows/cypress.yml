@@ -1,0 +1,124 @@
+name: Cypress E2E Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  cypress-run:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chrome, firefox]
+        
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify Cypress
+        run: npx cypress verify
+
+      - name: Run Cypress tests - ${{ matrix.browser }}
+        uses: cypress-io/github-action@v6
+        with:
+          browser: ${{ matrix.browser }}
+          config-file: cypress.config.js
+          spec: cypress/e2e/features/**/*.feature
+        continue-on-error: false
+
+      - name: Generate test reports
+        if: always()
+        run: npm run report:generate
+
+      - name: Upload Cucumber HTML Report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: cucumber-report-${{ matrix.browser }}
+          path: cypress/reports/html-cucumber/
+          retention-days: 30
+
+      - name: Upload Mochawesome Report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: mochawesome-report-${{ matrix.browser }}
+          path: cypress/reports/html/
+          retention-days: 30
+
+      - name: Upload Test Summary
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-summary-${{ matrix.browser }}
+          path: cypress/reports/test-summary.json
+          retention-days: 30
+
+      - name: Upload Screenshots
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: screenshots-${{ matrix.browser }}
+          path: cypress/screenshots/
+          retention-days: 30
+
+      - name: Upload Videos
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: videos-${{ matrix.browser }}
+          path: cypress/videos/
+          retention-days: 30
+
+      - name: Test Summary Comment
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const summaryPath = 'cypress/reports/test-summary.json';
+            
+            if (fs.existsSync(summaryPath)) {
+              const summary = JSON.parse(fs.readFileSync(summaryPath, 'utf8'));
+              
+              const comment = `
+              ## 🧪 Test Results - ${{ matrix.browser }}
+              
+              **Status**: ${summary.status === 'PASSED' ? '✅ PASSED' : '❌ FAILED'}
+              
+              ### Scenarios
+              - Total: ${summary.scenarios.total}
+              - Passed: ${summary.scenarios.passed}
+              - Failed: ${summary.scenarios.failed}
+              - Pass Rate: ${summary.scenarios.passRate}
+              
+              ### Steps
+              - Total: ${summary.steps.total}
+              - Passed: ${summary.steps.passed}
+              - Failed: ${summary.steps.failed}
+              - Pass Rate: ${summary.steps.passRate}
+              
+              **Executed**: ${summary.date} at ${summary.time}
+              `;
+              
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            }
