@@ -21,7 +21,7 @@
     "automation",
     "testing"
   ],
-  "author": "Daniel",
+  "author": "Ireti",
   "license": "MIT",
   "devDependencies": {
     "@badeball/cypress-cucumber-preprocessor": "^20.0.0",
